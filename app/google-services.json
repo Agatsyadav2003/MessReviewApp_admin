@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "219729222821",
+    "firebase_url": "https://my-application-6b503-default-rtdb.firebaseio.com",
+    "project_id": "my-application-6b503",
+    "storage_bucket": "my-application-6b503.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:219729222821:android:4618d65b804c280a31414c",
+        "android_client_info": {
+          "package_name": "com.ex.messreview"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_t905WkFFqdyFbAlzGkZiVgA5Ykvl9gM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:219729222821:android:04e3cd4f7d7b319331414c",
+        "android_client_info": {
+          "package_name": "com.ex.messreview_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_t905WkFFqdyFbAlzGkZiVgA5Ykvl9gM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
