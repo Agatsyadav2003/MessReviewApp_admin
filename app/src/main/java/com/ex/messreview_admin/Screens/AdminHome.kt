@@ -84,11 +84,23 @@ var selectedMealTime by mutableStateOf(currentMealTime)
 @Composable
 fun FoodItemList(day: String, mealTime: String, navController: NavHostController,mess:String,menuData: Map<String, Map<String, List<String>>>, viewModel: MenuViewModel) {
     val menuItems = menuData[day]?.get(mealTime) ?: listOf()
+    val ratingData by viewModel.ratingData.observeAsState(initial = emptyMap())
 
     LazyColumn(
         contentPadding = PaddingValues(0.dp)
     ) {
+
         item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))
+            )
+            {
+                BarChart(data = generateBarData(selectedDay, selectedMealTime,ratingData))
+            }
             Text(
                 text = "Menu for $day - $mealTime",
                 modifier = Modifier.padding(16.dp),
@@ -99,6 +111,7 @@ fun FoodItemList(day: String, mealTime: String, navController: NavHostController
             )
 
         }
+
         items(menuItems) { menuItem ->
             Card(
                 modifier = Modifier
@@ -162,7 +175,7 @@ fun HomeScreen(navController: NavHostController, catererName: String, messType: 
     val mealListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val menuData by viewModel.menuData.observeAsState(initial = emptyMap())
-    val ratingData by viewModel.ratingData.observeAsState(initial = emptyMap())
+
 
     LaunchedEffect(Unit) {
         coroutineScope.launch {
@@ -209,7 +222,15 @@ fun HomeScreen(navController: NavHostController, catererName: String, messType: 
             )
 
             IconButton(
-                onClick = { navController.popBackStack() },
+                onClick = { viewModel.addItem("$catererName-$messType", daysOfWeek[selectedDay], selectedMealTime,
+                    onSuccess = {
+                        // Handle success (e.g., show a success message)
+                    },
+                    onFailure = { e ->
+                        // Handle failure (e.g., show an error message)
+                    }
+                )
+                    viewModel.fetchMenuData("$catererName-$messType")          },
                 modifier = Modifier
                     .size(40.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
@@ -290,16 +311,7 @@ fun HomeScreen(navController: NavHostController, catererName: String, messType: 
         }
 
         // Add the chart here
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))
-        )
-        {
-            BarChart(data = generateBarData(selectedDay, selectedMealTime,ratingData))
-        }
+
 
         if (selectedDay > -1) {
             FoodItemList(day = daysOfWeek[selectedDay], mealTime = selectedMealTime, navController = navController,mess="$catererName-$messType",menuData = menuData,viewModel)

@@ -24,6 +24,42 @@ class MenuViewModel : ViewModel() {
     val ratingData = MutableLiveData<Map<String, List<Float>>>()
     val monthlyAverages = MutableLiveData<Map<String, List<Float>>>()
     val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+    fun addItem(mess: String, dayOfWeek: String, mealTime: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val docRef = db.collection(mess).document(dayOfWeek)
+        val newItemName = "Item"
+
+        docRef.get().addOnSuccessListener { document ->
+            if (document != null) {
+                val items = document.get(mealTime) as? MutableList<String>
+                if (items != null) {
+                    items.add(newItemName)
+                    docRef.update(mealTime, items).addOnSuccessListener {
+                        onSuccess()
+                    }.addOnFailureListener { e ->
+                        onFailure(e)
+                    }
+                } else {
+                    val newItems = mutableListOf(newItemName)
+                    docRef.update(mealTime, newItems).addOnSuccessListener {
+                        onSuccess()
+                    }.addOnFailureListener { e ->
+                        onFailure(e)
+                    }
+                }
+            } else {
+                val newItems = mutableListOf(newItemName)
+                docRef.set(mapOf(mealTime to newItems)).addOnSuccessListener {
+                    onSuccess()
+                }.addOnFailureListener { e ->
+                    onFailure(e)
+                }
+            }
+        }.addOnFailureListener { e ->
+            onFailure(e)
+        }
+    }
+
     fun saveItem(mess: String, dayOfWeek: String, mealTime: String, oldItemName: String, newItemName: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val docRef = db.collection(mess).document(dayOfWeek)
@@ -110,8 +146,8 @@ class MenuViewModel : ViewModel() {
 
 
         val itemName = pathComponents[4]
-
-        val itemRef = database.child(itemPath).child(itemName)
+        val itemPath1= pathComponents[0]+"-"+pathComponents[1]+"-"+pathComponents[2]+"-"+pathComponents[3]
+        val itemRef = database.child(itemPath1).child(itemName)
         val ratingsMap = mutableMapOf<String, MutableList<Float>>()
 
         itemRef.addListenerForSingleValueEvent(object : ValueEventListener {
