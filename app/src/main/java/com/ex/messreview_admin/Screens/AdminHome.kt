@@ -1,11 +1,17 @@
 package com.ex.messreview.Screens
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -22,6 +29,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -42,7 +50,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
@@ -82,14 +92,52 @@ val mealTimes = listOf("Breakfast", "Lunch", "High Tea", "Dinner")
 var selectedMealTime by mutableStateOf(currentMealTime)
 
 @Composable
-fun FoodItemList(day: String, mealTime: String, navController: NavHostController,mess:String,menuData: Map<String, Map<String, List<String>>>, viewModel: MenuViewModel) {
+fun LoadingAnimation() {
+    val infiniteTransition = rememberInfiniteTransition()
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 1000
+                0.7f at 100
+                0.9f at 400
+            },
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(90.dp)
+                .background(color = Color.Gray, shape = CircleShape)
+                .alpha(alpha)
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+        Box(
+            modifier = Modifier
+                .height(24.dp)
+                .fillMaxWidth()
+                .background(color = Color.Gray, shape = RoundedCornerShape(4.dp))
+                .alpha(alpha)
+        )
+    }
+}
+@Composable
+fun FoodItemList(day: String, mealTime: String, navController: NavHostController, mess: String, menuData: Map<String, Map<String, List<String>>>, viewModel: MenuViewModel) {
     val menuItems = menuData[day]?.get(mealTime) ?: listOf()
     val ratingData by viewModel.ratingData.observeAsState(initial = emptyMap())
+
+    val isLoading = menuData.isEmpty() || ratingData.isEmpty()
 
     LazyColumn(
         contentPadding = PaddingValues(0.dp)
     ) {
-
         item {
             Card(
                 modifier = Modifier
@@ -97,9 +145,12 @@ fun FoodItemList(day: String, mealTime: String, navController: NavHostController
                     .padding(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                 shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))
-            )
-            {
-                BarChart(data = generateBarData(selectedDay, selectedMealTime,ratingData))
+            ) {
+                if (isLoading) {
+                    LoadingAnimation()
+                } else {
+                    BarChart(data = generateBarData(selectedDay, selectedMealTime, ratingData))
+                }
             }
             Text(
                 text = "Menu for $day - $mealTime",
@@ -109,65 +160,79 @@ fun FoodItemList(day: String, mealTime: String, navController: NavHostController
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium
             )
-
         }
 
-        items(menuItems) { menuItem ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .clickable {
-                        viewModel.calculateMonthlyAverages("$mess-$day-$mealTime-$menuItem")
-                        navController.navigate("rating_screen/$menuItem/${R.drawable.foodimg}/$mess-$day-$mealTime")
-
-                    },
-                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(16.dp)
+        if (isLoading) {
+            items(5) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.foodimg),
-                        contentDescription = "Meal Image",
-                        modifier = Modifier
-                            .size(90.dp)
-                            .clip(CircleShape)
-                            .padding(end = 15.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                    Column(
-                        modifier = Modifier.weight(2f),
-                    ) {
-                        Text(
-                            text = menuItem,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    IconButton(
-                        onClick = {
-                            navController.navigate("item_edit_screen/$day/$mealTime/$menuItem/$mess")
+                    LoadingAnimation()
+                }
+            }
+        } else {
+            items(menuItems) { menuItem ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .clickable {
+                            viewModel.calculateMonthlyAverages("$mess-$day-$mealTime-$menuItem")
+                            navController.navigate("rating_screen/$menuItem/${R.drawable.foodimg}/$mess-$day-$mealTime")
                         },
-                        modifier = Modifier.padding(start = 16.dp)
+                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = "Navigate to Edit screen",
-                            tint = MaterialTheme.colorScheme.primary
+                        Image(
+                            painter = painterResource(id = R.drawable.foodimg),
+                            contentDescription = "Meal Image",
+                            modifier = Modifier
+                                .size(90.dp)
+                                .clip(CircleShape)
+                                .padding(end = 15.dp),
+                            contentScale = ContentScale.Crop
                         )
+                        Column(
+                            modifier = Modifier.weight(2f),
+                        ) {
+                            Text(
+                                text = menuItem,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                navController.navigate("item_edit_screen/$day/$mealTime/$menuItem/$mess")
+                            },
+                            modifier = Modifier.padding(start = 16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = "Navigate to Edit screen",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun HomeScreen(navController: NavHostController, catererName: String, messType: String, viewModel: MenuViewModel) {
@@ -389,7 +454,29 @@ fun BarChart(data: BarData) {
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    MaterialTheme { // Use MaterialTheme to provide default styling
+        HomeScreen(
+            navController = rememberNavController(),
+            catererName = "Zenith",
+            messType = "Veg",
+            viewModel = MenuViewModel() // You'll likely need a mock ViewModel for preview
+        )
 
+
+    }
+}
+@Preview(showBackground = true)
+@Composable
+fun laodingPreview() {
+    MaterialTheme { // Use MaterialTheme to provide default styling
+       LoadingAnimation()
+
+
+    }
+}
 
 
 
