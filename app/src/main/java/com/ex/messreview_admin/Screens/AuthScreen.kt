@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package com.ex.messreview.Screens
 
@@ -82,16 +82,23 @@ fun AuthScreen(
         }
         Spacer(modifier = Modifier.height(30.dp))
         Button(
-            onClick = {  val email =
-               formatUsername(username)
-                FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            onLoginClicked(username, password)
-                        } else {
-                            Toast.makeText(context, "Authentication failed.", Toast.LENGTH_SHORT).show()
+            onClick = {
+                if (username.isEmpty() || password.isEmpty()) {Toast.makeText(context, "Enter Credentials", Toast.LENGTH_SHORT).show()}
+                else{
+                    val email = formatUsername(username)
+                    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                onLoginClicked(username, password)
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Authentication failed.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
-                    } },
+                }},
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .aspectRatio(3f) // Maintain aspect ratio
