@@ -77,14 +77,18 @@ fun RatingScreen(itemName: String, imageResId: Int,itemInfo:String?, viewModel: 
     LaunchedEffect(itemName) {
         val database = FirebaseDatabase.getInstance().reference
         val itemRef = database.child("items").child(itemInfo ?: "").child(itemName)
-        itemRef.child("reviews").addValueEventListener(object : ValueEventListener {
+        itemRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 reviews.clear()
-                for (reviewSnapshot in snapshot.children) {
-                    val username = reviewSnapshot.key ?: ""
-                    val text = reviewSnapshot.getValue(String::class.java) ?: ""
-                    val rating = reviewSnapshot.child("rating").getValue(Int::class.java) ?: 0
-                    reviews.add(Review(username, text, rating))
+                for (dateSnapshot in snapshot.children) {
+                    val date = dateSnapshot.key ?: ""
+                    val reviewsSnapshot = dateSnapshot.child("reviews")
+                    for (reviewSnapshot in reviewsSnapshot.children) {
+                        val username = reviewSnapshot.key ?: ""
+                        val text = reviewSnapshot.getValue(String::class.java) ?: ""
+                        val rating = reviewSnapshot.child("rating").getValue(Int::class.java) ?: 0
+                        reviews.add(Review(username, text, rating))
+                    }
                 }
             }
 

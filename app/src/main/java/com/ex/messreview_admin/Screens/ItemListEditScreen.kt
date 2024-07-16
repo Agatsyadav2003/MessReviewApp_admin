@@ -161,7 +161,8 @@ fun itemEditScreen(dayOfWeek: String, mealTime: String, itemName: String, mess:S
                     onFailure = { e ->
                         // Handle failure (e.g., show an error message)
                     }
-                ) },
+                )
+                    viewModel.fetchMenuData("$mess")},
                 modifier = Modifier
                     .size(50.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
@@ -181,7 +182,8 @@ fun itemEditScreen(dayOfWeek: String, mealTime: String, itemName: String, mess:S
                     onFailure = { e ->
                         // Handle failure (e.g., show an error message)
                     }
-                ) },
+                )
+                    viewModel.fetchMenuData("$mess")},
                 modifier = Modifier
                     .size(50.dp)
                     .background(MaterialTheme.colorScheme.error, CircleShape)
