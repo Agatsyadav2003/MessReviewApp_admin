@@ -23,6 +23,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -35,11 +37,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.ex.messreview_admin.viewmodel.AuthState
+import com.ex.messreview_admin.viewmodel.AuthViewModel
 import java.util.Calendar
 
 @Composable
-fun CatererScreen(navController: NavController, onCatererSelected: (String) -> Unit) {
+fun CatererScreen(navController: NavController, onCatererSelected: (String) -> Unit, authViewModel: AuthViewModel) {
     val greetingMessage = getGreetingMessage()
+    val authState = authViewModel.authState.observeAsState()
+
+    LaunchedEffect(authState.value) {
+        when(authState.value){
+            is AuthState.Unauthenticated -> navController.navigate("auth_screen")
+            else -> Unit
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -92,7 +104,7 @@ fun CatererScreen(navController: NavController, onCatererSelected: (String) -> U
             horizontalArrangement = Arrangement.End
         ) {
             IconButton(
-                onClick = { navController.navigate("profile_screen") },
+                onClick = { authViewModel.signout()},
                 modifier = Modifier
                     .size(50.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
@@ -148,12 +160,12 @@ fun getGreetingMessage(): String {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun CatererScreenPreview() {MaterialTheme { // Add MaterialTheme wrapper
-    CatererScreen(
-        navController = rememberNavController(), // Use rememberNavController
-        onCatererSelected = {} // Provide an empty lambda for onCatererSelected
-    )
-}
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun CatererScreenPreview() {MaterialTheme { // Add MaterialTheme wrapper
+//    CatererScreen(
+//        navController = rememberNavController(), // Use rememberNavController
+//        onCatererSelected = {} // Provide an empty lambda for onCatererSelected
+//    )
+//}
+//}

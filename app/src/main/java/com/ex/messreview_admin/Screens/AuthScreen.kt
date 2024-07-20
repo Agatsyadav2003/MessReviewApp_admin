@@ -28,7 +28,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,18 +46,30 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.ex.messreview_admin.R
+import com.ex.messreview_admin.viewmodel.AuthState
+import com.ex.messreview_admin.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthScreen(
-    onLoginClicked: (String, String) -> Unit
+    navController: NavController, authViewModel: AuthViewModel
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val authState = authViewModel.authState.observeAsState()
+    LaunchedEffect(authState.value) {
+        when(authState.value){
+            is AuthState.Authenticated -> navController.navigate("caterer_screen")
+            is AuthState.Error -> Toast.makeText(context,
+                (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
+            else -> Unit
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,22 +97,7 @@ fun AuthScreen(
         Spacer(modifier = Modifier.height(30.dp))
         Button(
             onClick = {
-                if (username.isEmpty() || password.isEmpty()) {Toast.makeText(context, "Enter Credentials", Toast.LENGTH_SHORT).show()}
-                else{
-                    val email = formatUsername(username)
-                    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                onLoginClicked(username, password)
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "Authentication failed.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                }},
+                authViewModel.login(username,password)},
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .aspectRatio(3f) // Maintain aspect ratio
@@ -109,13 +108,7 @@ fun AuthScreen(
         }
     }
 }
-fun formatUsername(username: String): String {
-    return if (username.matches(Regex("admin\\d{4}"))) {
-        "$username@gmail.com"
-    } else {
-        username
-    }
-}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserTextField(value: String, onValueChange: (String) -> Unit) {
@@ -169,8 +162,8 @@ fun PasswordField(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview() {
-    AuthScreen(onLoginClicked = { _, _ -> })
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun LoginPreview() {
+//    AuthScreen(onLoginClicked = { _, _ -> })
+//}

@@ -13,19 +13,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ex.messreview_admin.Screens.CatererScreen
 import com.ex.messreview_admin.Screens.MessTypeScreen
 import com.ex.messreview_admin.Screens.itemEditScreen
+import com.ex.messreview_admin.viewmodel.AuthViewModel
 import com.ex.messreview_admin.viewmodel.MenuViewModel
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(authViewModel: AuthViewModel) {
     val navController = rememberNavController()
     val viewModel: MenuViewModel = viewModel()
     NavHost(navController = navController, startDestination = "auth_screen") {
         composable("auth_screen") {
            AuthScreen(
-                onLoginClicked = { username, password ->
-                    // Handle login logic here, then navigate to caterer_screen
-                    navController.navigate("caterer_screen")
-                }
+               navController,authViewModel
             )
         }
         composable("caterer_screen") {
@@ -34,7 +32,7 @@ fun AppNavigation() {
                 onCatererSelected = { catererName ->
                     // Navigate to mess_type_screen and pass selected caterer name
                     navController.navigate("mess_type_screen/$catererName")
-                }
+                },authViewModel
             )
         }
         composable("profile_screen") {
