@@ -83,7 +83,7 @@ fun MessTypeScreen(navController: NavController, catererName: String,viewModel: 
                 text = "MESS-TYPE",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(start = 16.dp)
             )
 
@@ -114,7 +114,7 @@ fun MessTypeCard(type: String,type1:String, rating: Int, navController: NavContr
                 navController.navigate("home_screen/$catererName/$type1")
 
             },
-        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))
     ){
@@ -128,7 +128,7 @@ fun MessTypeCard(type: String,type1:String, rating: Int, navController: NavContr
             Spacer(modifier = Modifier.weight(0.5f))
             Text(
                 text = type,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = MaterialTheme.colorScheme.onPrimary ,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.ExtraBold
             )

@@ -145,7 +145,8 @@ fun FoodItemList(day: String, mealTime: String, navController: NavHostController
                     .fillMaxWidth()
                     .padding(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))
+                shape = MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp)),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
             ) {
                 if (isLoading) {
                     LoadingAnimation()
@@ -287,7 +288,7 @@ fun HomeScreen(navController: NavHostController, catererName: String, messType: 
                 text = "$catererName: $messType",
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.primary,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontSize = MaterialTheme.typography.displaySmall.fontSize,
                 fontWeight = FontWeight.ExtraBold,
                 style = MaterialTheme.typography.titleLarge
             )
@@ -412,6 +413,7 @@ fun getRatingsForDayAndMeal(day: Int, mealTime: String, ratingData: Map<String, 
 
 @Composable
 fun BarChart(data: BarData) {
+    val labelTextColor = MaterialTheme.colorScheme.onSurface.toArgb()
     AndroidView(
         factory = { context ->
             com.github.mikephil.charting.charts.BarChart(context).apply {
@@ -448,13 +450,15 @@ fun BarChart(data: BarData) {
         },
         update = { chart ->
             chart.data = data
+            chart.xAxis.textColor = labelTextColor
+            chart.axisLeft.textColor = labelTextColor
             chart.invalidate()
         },
         modifier = Modifier
             .fillMaxWidth()
             .height(250.dp) // Adjust height as needed
             .clip(MaterialTheme.shapes.medium.copy(all = CornerSize(36.dp))) // Add clipping to match card shape
-            .background(MaterialTheme.colorScheme.surface) // Ensure background color matches card
+
             .padding(16.dp) // Add padding for better appearance
             .horizontalScroll(rememberScrollState()) // Enable horizontal scrolling
     )
@@ -474,13 +478,12 @@ fun HomeScreenPreview() {
 
     }
 }
+
 @Preview(showBackground = true)
 @Composable
-fun laodingPreview() {
+fun chartPreview(){
     MaterialTheme { // Use MaterialTheme to provide default styling
-       LoadingAnimation()
-
-
+        BarChart(data = generateBarData(selectedDay, selectedMealTime, ratingsMap))
     }
 }
 

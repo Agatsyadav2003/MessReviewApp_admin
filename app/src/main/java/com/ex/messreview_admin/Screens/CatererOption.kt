@@ -63,13 +63,13 @@ fun CatererScreen(navController: NavController, onCatererSelected: (String) -> U
                 text = greetingMessage,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = "Admin",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(50.dp))
