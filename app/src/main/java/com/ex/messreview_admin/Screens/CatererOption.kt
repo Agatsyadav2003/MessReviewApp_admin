@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.FoodBank
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -112,8 +113,8 @@ fun CatererScreen(navController: NavController, onCatererSelected: (String) -> U
 
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = "admin profile",
+                    imageVector = Icons.Filled.ExitToApp,
+                    contentDescription = "signout",
                     tint = MaterialTheme.colorScheme.onPrimary
 
                 )

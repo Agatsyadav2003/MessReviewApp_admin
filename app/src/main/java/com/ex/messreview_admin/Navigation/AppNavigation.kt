@@ -7,7 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ex.messreview.Screens.AuthScreen
 import com.ex.messreview.Screens.HomeScreen
-import com.ex.messreview.Screens.ProfileScreen
+
 import com.ex.messreview.Screens.RatingScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ex.messreview_admin.Screens.CatererScreen
@@ -35,9 +35,7 @@ fun AppNavigation(authViewModel: AuthViewModel) {
                 },authViewModel
             )
         }
-        composable("profile_screen") {
-            ProfileScreen()
-        }
+
         composable(
             "mess_type_screen/{catererName}",
             arguments = listOf(navArgument("catererName") { type = NavType.StringType })
