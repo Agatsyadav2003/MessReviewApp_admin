@@ -1,5 +1,6 @@
 package com.ex.messreview_admin.Screens
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -51,10 +52,18 @@ import androidx.compose.ui.unit.dp
 import com.ex.messreview_admin.R
 import com.ex.messreview_admin.viewmodel.MenuViewModel
 
+
+fun cropToSquare(bitmap: Bitmap): Bitmap {
+    val size = minOf(bitmap.width, bitmap.height)
+    val xOffset = (bitmap.width - size) / 2
+    val yOffset = (bitmap.height - size) / 2
+    return Bitmap.createBitmap(bitmap, xOffset, yOffset, size, size)
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun itemEditScreen(dayOfWeek: String, mealTime: String, itemName: String, mess:String, viewModel: MenuViewModel) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var croppedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var itemNameState by remember { mutableStateOf(TextFieldValue(itemName)) }
     val context = LocalContext.current
 
@@ -63,6 +72,10 @@ fun itemEditScreen(dayOfWeek: String, mealTime: String, itemName: String, mess:S
     ) { uri: Uri? ->
         if (uri != null) {
             imageUri = uri
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                croppedBitmap = cropToSquare(bitmap)
+            }
         }
     }
 
@@ -107,13 +120,16 @@ fun itemEditScreen(dayOfWeek: String, mealTime: String, itemName: String, mess:S
                         ).asImageBitmap(),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
                     )
                 } ?: run {
                     Image(
                         painter = painterResource(id = R.drawable.foodimg),
                         contentDescription = null,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                 }
                 Icon(
@@ -196,6 +212,19 @@ fun itemEditScreen(dayOfWeek: String, mealTime: String, itemName: String, mess:S
             }
         }
     }
+}
+@Preview(showBackground = true)
+@Composable
+fun PreviewItemEditScreen() {
+
+    val mockViewModel = MenuViewModel()
+    itemEditScreen(
+        dayOfWeek = "Monday",
+        mealTime = "Lunch",
+        itemName = "Paneer Butter Masala",
+        mess = "Mess A",
+        viewModel = mockViewModel
+    )
 }
 
 

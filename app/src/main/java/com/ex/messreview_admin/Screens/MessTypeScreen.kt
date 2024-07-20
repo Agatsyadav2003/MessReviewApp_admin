@@ -24,6 +24,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ex.messreview_admin.viewmodel.MenuViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun MessTypeScreen(navController: NavController, catererName: String,viewModel: MenuViewModel) {
@@ -48,7 +51,9 @@ fun MessTypeScreen(navController: NavController, catererName: String,viewModel: 
             )
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
@@ -95,14 +100,19 @@ fun MessTypeScreen(navController: NavController, catererName: String,viewModel: 
 
 @Composable
 fun MessTypeCard(type: String,type1:String, rating: Int, navController: NavController, catererName: String,viewModel: MenuViewModel) {
+    val coroutineScope = rememberCoroutineScope()
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                viewModel.fetchRatingData("$catererName-$type1")
-                viewModel.fetchMenuData("$catererName-$type1")
+                coroutineScope.launch {
+                    viewModel.fetchRatingData("$catererName-$type1")
+                    viewModel.fetchMenuData("$catererName-$type1")
+
+                }
                 navController.navigate("home_screen/$catererName/$type1")
+
             },
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),

@@ -62,6 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.ex.messreview_admin.R
@@ -246,6 +247,7 @@ fun HomeScreen(navController: NavHostController, catererName: String, messType: 
         coroutineScope.launch {
             dayListState.scrollToItem(selectedDay)
             mealListState.scrollToItem(mealTimes.indexOf(selectedMealTime))
+
         }
     }
 
@@ -266,7 +268,11 @@ fun HomeScreen(navController: NavHostController, catererName: String, messType: 
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
-                onClick = { navController.popBackStack() },
+                onClick = {
+                    navController.popBackStack()
+                    viewModel.menuData.value = emptyMap()
+                    viewModel.ratingData.value = emptyMap()
+                          },
                 modifier = Modifier
                     .size(40.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
@@ -375,7 +381,7 @@ fun HomeScreen(navController: NavHostController, catererName: String, messType: 
             }
         }
 
-        // Add the chart here
+
 
 
         if (selectedDay > -1) {
