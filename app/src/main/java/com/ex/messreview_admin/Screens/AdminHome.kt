@@ -1,5 +1,6 @@
 package com.ex.messreview.Screens
 
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -46,6 +47,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -62,11 +64,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.CreationExtras
+
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.ex.messreview_admin.R
-import com.ex.messreview_admin.data.menuData
+
 import com.ex.messreview_admin.data.ratingsMap
 import com.ex.messreview_admin.viewmodel.MenuViewModel
 import com.github.mikephil.charting.components.XAxis
@@ -74,6 +77,7 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
@@ -133,9 +137,18 @@ fun LoadingAnimation() {
 fun FoodItemList(day: String, mealTime: String, navController: NavHostController, mess: String, menuData: Map<String, Map<String, List<String>>>, viewModel: MenuViewModel) {
     val menuItems = menuData[day]?.get(mealTime) ?: listOf()
     val ratingData by viewModel.ratingData.observeAsState(initial = emptyMap())
-
+    var imageUrls by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     val isLoading = menuData.isEmpty() || ratingData.isEmpty()
-
+    fun loadImageUrlFromFirebase(mess: String, dayOfWeek: String, mealTime: String, itemName: String) {
+        val database = FirebaseDatabase.getInstance().reference
+        database.child("items").child("$mess-$dayOfWeek-$mealTime").child(itemName).child("Desription").get().addOnSuccessListener { snapshot ->
+            val url = snapshot.getValue(String::class.java)
+            imageUrls = imageUrls + (itemName to (url ?: "https://firebasestorage.googleapis.com/v0/b/my-application-6b503.appspot.com/o/foodimg.jpg?alt=media&token=5039597d-d0c1-4dd3-88ce-bd31784f0a9d"))
+        }.addOnFailureListener {
+            // Handle errors in fetching URL
+            Log.e("ImageFetch", "Failed to fetch image URL", it)
+        }
+    }
     LazyColumn(
         contentPadding = PaddingValues(0.dp)
     ) {
@@ -179,6 +192,11 @@ fun FoodItemList(day: String, mealTime: String, navController: NavHostController
             }
         } else {
             items(menuItems) { menuItem ->
+                LaunchedEffect(menuItem) {
+                    loadImageUrlFromFirebase(mess, day, mealTime, menuItem)
+                }
+
+                val imageUrl = imageUrls[menuItem]
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -196,15 +214,35 @@ fun FoodItemList(day: String, mealTime: String, navController: NavHostController
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.foodimg),
-                            contentDescription = "Meal Image",
-                            modifier = Modifier
-                                .size(90.dp)
-                                .clip(CircleShape)
-                                .padding(end = 15.dp),
-                            contentScale = ContentScale.Crop
-                        )
+                        imageUrl?.let {
+                            Image(
+                                painter = rememberAsyncImagePainter(it),
+                                contentDescription = "Meal Image",
+                                modifier = Modifier
+                                    .size(90.dp)
+                                    .clip(CircleShape)
+                                    .padding(end=15.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        } ?: run {
+                            Image(
+                                painter = painterResource(id = R.drawable.foodimg),
+                                contentDescription = "Meal Image",
+                                modifier = Modifier
+                                    .size(90.dp)
+                                    .clip(CircleShape)
+                                    .padding(end=15.dp),
+                                    contentScale = ContentScale.Crop
+                            )}
+//                        Image(
+//                            painter = painterResource(id = R.drawable.foodimg),
+//                            contentDescription = "Meal Image",
+//                            modifier = Modifier
+//                                .size(90.dp)
+//                                .clip(CircleShape)
+//                                .padding(end = 15.dp),
+//                            contentScale = ContentScale.Crop
+//                        )
                         Column(
                             modifier = Modifier.weight(2f),
                         ) {

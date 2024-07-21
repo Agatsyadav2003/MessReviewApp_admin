@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -26,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,8 +46,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import androidx.navigation.NavController
 import com.ex.messreview_admin.R
 import com.ex.messreview_admin.viewmodel.AuthState
@@ -118,11 +123,14 @@ fun UserTextField(value: String, onValueChange: (String) -> Unit) {
         label = {
             Text(
                 text = "Username",
-                color = Color(0xFF838383),
+                color =MaterialTheme.colorScheme.onSecondary,
                 style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp)
             )
         },
-        colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xfffbfbfb)),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = MaterialTheme.colorScheme.onSecondary,
+            containerColor = Color(0xfffbfbfb)
+        ),
         modifier = Modifier
             .requiredWidth(331.dp)
             .requiredHeight(54.dp)
@@ -142,11 +150,14 @@ fun PasswordField(
         label = {
             Text(
                 text = "Password",
-                color = Color(0xFF808080),
+                color = MaterialTheme.colorScheme.onSecondary,
                 style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp)
             )
         },
-        colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xfffbfbfb)),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = MaterialTheme.colorScheme.onSecondary,
+            containerColor = Color(0xfffbfbfb)
+        ),
         modifier = Modifier
             .requiredWidth(331.dp)
             .requiredHeight(54.dp),
@@ -162,8 +173,6 @@ fun PasswordField(
     )
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun LoginPreview() {
-//    AuthScreen(onLoginClicked = { _, _ -> })
-//}
+
+
+
